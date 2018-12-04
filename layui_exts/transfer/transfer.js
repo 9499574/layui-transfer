@@ -7,12 +7,14 @@ layui.define('table',function (exports) {
         ,transfer = {
             index:layui.transfer?(layui.transfer+1000):0
             ,idData:[] //ID池
+            ,data:[] //原始数据
+            ,options:[]
             ,update:function (data,filed) {
                 if(filed=='' && data && data.length > 0){
                     var d = [];
                     $.each(data,function (k,v) {
-                        delete v.LAY_TABLE_INDEX
-                        delete v.LAY_CHECKED
+                        v.LAY_TABLE_INDEX && delete v.LAY_TABLE_INDEX
+                        v.LAY_CHECKED && delete v.LAY_CHECKED
                         d.push(v)
                     })
                     return d
@@ -31,23 +33,36 @@ layui.define('table',function (exports) {
                 }
             }
             ,get:function (option,type,field='') {
-
                 var index = option.index
+                var data = transfer.data;
                 if(!index){
                     return [];
                 }
+
                 if(type==='all'){
-                    var d = [];
-                    var d1 = table.cache[LEFT_TABLE+index],d2 = table.cache[RIGHT_TABLE+index];
-                    d1 = this.update(d1,field);
-                    d2 = this.update(d2,field)
+                    var d = [],d1=[],d2=[];
+                    for (var i = data.length - 1; i >= 0; i--) {
+                        if(data[i].id==LEFT_TABLE+index){
+                            d1= data[i].data;
+                        }else if(data[i].id==RIGHT_TABLE+index){
+                            d2 = data[i].data;
+                        }
+                    }
                     d.push({left:d1})
                     d.push({right:d2})
                     return d
                 }else if(type==='left' || type==='l'){
-                    return this.update(table.cache[LEFT_TABLE+index],field)
+                    for (var i = data.length - 1; i >= 0; i--) {
+                        if(data[i].id==LEFT_TABLE+index){
+                            return this.update(data[i].data,field);
+                        }
+                    }
                 }else if(type === 'right' || type==='r'){
-                    return this.update(table.cache[RIGHT_TABLE+index],field)
+                    for (var i = data.length - 1; i >= 0; i--) {
+                        if(data[i].id==RIGHT_TABLE+index){
+                            return this.update(data[i].data,field);
+                        }
+                    }
                 }
             }
         }
@@ -59,8 +74,9 @@ layui.define('table',function (exports) {
         }
         ,Class = function (options) {
             var that = this
-            that.index = ++transfer.index
+            that.index = transfer.index?transfer.index:++transfer.index
             that.config = options
+            transfer.options = options
             that.createHTMLDocument()
             that.render()
         };
@@ -105,12 +121,12 @@ layui.define('table',function (exports) {
             d2_c = $.extend(d2_c,options.tabConfig)
         }
         transfer.idData.push(that.index)
+        transfer.data = [];
+        transfer.data.push({id:LEFT_TABLE+that.index,data:(options.data[0]?options.data[0]:[])})
+        transfer.data.push({id:RIGHT_TABLE+that.index,data:(options.data[1]?options.data[1]:[])})
         table.render(d1_c)
-        table.init()
         table.render(d2_c)
-
         that.move()
-        that.click()
     };
     //左右移动按钮根据左表格居中
     Class.prototype.move = function () {
@@ -121,27 +137,55 @@ layui.define('table',function (exports) {
         elem.parents('.layui-row').find('.'+MD2).css('padding-top',h+'px')
     }
     //点击事件
-    Class.prototype.click = function () {
-        var that = this,option = that.config;
-        $(option.elem).find('.'+BTN_STLY).each(function () {
-            var othis = $(this)
-            othis.on('click',function () {
-                if(!$(this).hasClass(DISABLED)){
-                    var type = $(this).data('type'),index = $(this).data('index');
-                    var checkStatus = table.checkStatus((type==0?LEFT_TABLE+index:RIGHT_TABLE+index)),data = checkStatus.data;
-                    var d1 = table.cache[LEFT_TABLE+index]
-                    var d2 = table.cache[RIGHT_TABLE+index]
-                    if(type==0 && data){
-                        //左边的数据移动到右表
-                        that.shiftData(d1,d2,data,type)
-                    }else if(type==1 && data){
-                        //右表的数据移动到左表
-                        that.shiftData(d2,d1,data,type)
-                    }
+    $(document).on('click','.'+BTN_STLY,function () {
+        var othis = $(this),type = othis.data('type');
+        datas(type)
+    })
+    //数据处理
+    //data 选中数据
+    //type 类型 0 左 1 右
+    function datas (type) {
+        var d = transfer.data;
+        var d1 = d[0].data;
+        var d2 =  d[1].data;
+        var _d = [];
+        if(d1.length > 0 && type==0){
+            //左边的数据移动到右表
+            var n_d1 = []; 
+            d1.reverse()
+            for (var i = 0; i < d1.length; i++) {
+                if(d1[i].LAY_CHECKED===true){
+                    delete d1[i].LAY_CHECKED
+                    delete d1[i].LAY_TABLE_INDEX
+                    d2.unshift(d1[i])
+                }else{
+                    delete d1[i].LAY_TABLE_INDEX
+                    n_d1.push(d1[i])
                 }
-            })
-        })
+            }
+            
+            _d.push(n_d1,d2)
+
+        }else if(d2.length > 0 && type==1){
+             //左边的数据移动到右表
+            var n_d2 = []; 
+            for (var i = 0; i < d2.length; i++) {
+                if(d2[i].LAY_CHECKED && d2[i].LAY_CHECKED===true){
+                    delete d2[i].LAY_CHECKED
+                    d2[i].LAY_TABLE_INDEX && delete d2[i].LAY_TABLE_INDEX
+                    d1.push(d2[i])
+                }else{
+                    delete d2[i].LAY_TABLE_INDEX
+                    n_d2.push(d2[i])
+                }
+            }
+             _d.push(d1,n_d2)
+        }
+        var options = transfer.options
+        options.data = _d
+        transfer.render(options)
     }
+
     //数据处理
     Class.prototype.shiftData = function (data1,data2,data,type) {
         var da = [];//未选中的数据
