@@ -138,8 +138,11 @@ layui.define('table',function (exports) {
     }
     //点击事件
     $(document).on('click','.'+BTN_STLY,function () {
-        var othis = $(this),type = othis.data('type');
-        datas(type)
+    	if(!$(this).hasClass(DISABLED)){
+ 			var othis = $(this),type = othis.data('type');
+        	datas(type)
+    	}
+       
     })
     //数据处理
     //data 选中数据
