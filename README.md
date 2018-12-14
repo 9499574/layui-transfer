@@ -1,9 +1,8 @@
 # Transfer 穿梭框组件-基于layui
 ![2018-11-23.17.37.27-GIF1.gif](https://raw.githubusercontent.com/9499574/markdown/master/img/2018-11-23.17.37.27-GIF1.gif)
 
-[在线体验](https://9499574.github.io/layui-transfer/)
+[在线体验](https://9499574.github.io/layui-transfer/)  [异步版本](https://github.com/9499574/layui-transfer-ajax)
 
-[异步版本](https://github.com/9499574/layui-transfer-ajax)
 
 ### 如何使用:
 ***
