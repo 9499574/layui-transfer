@@ -144,6 +144,7 @@ layui.define('table',function (exports) {
     	}
        
     })
+
     //数据处理
     //data 选中数据
     //type 类型 0 左 1 右
@@ -185,36 +186,54 @@ layui.define('table',function (exports) {
              _d.push(d1,n_d2)
         }
         var options = transfer.options
-        options.data = _d
+        options.data =datasChecked(_d);
         transfer.render(options)
     }
 
-    //数据处理
-    Class.prototype.shiftData = function (data1,data2,data,type) {
-        var da = [];//未选中的数据
-        // d1.reverse();
-        $.each(data1,function(k,v){
-            if(!v.LAY_CHECKED){
-                da.push(v)
-            }
-        })
-        // dd.reverse();
-        $.each(data,function(kk,vv){
-            data2.unshift(vv)
-        })
-        var d = [];
-        if(type==0){
-            d.push(da)
-            d.push(data2)
-            $('#'+LEFT_BTN+this.index).children(BTN).addClass(DISABLED);
-        }else if(type==1){
-            d.push(data2)
-            d.push(da)
-            $('#'+RIGHT_BTN+this.index).children(BTN).addClass(DISABLED);
-        }
-        this.config.data = d
-        this.render()
+    function datasChecked(data){
+    	var d1= [];
+    	var d2 = [];
+    	if(data[0] && data[0].length){
+    		$.each(data[0],function(k,v){
+    			 v.LAY_CHECKED===true && delete v.LAY_CHECKED
+    			 d1.push(v)
+    		});
+    	}
+    	if(data[1] && data[1].length){
+    		$.each(data[1],function(k,v){
+    			 v.LAY_CHECKED===true && delete v.LAY_CHECKED
+    			 d2.push(v)
+    		});
+    	}
+    	return [d1,d2];
     }
+
+    //数据处理
+    // Class.prototype.shiftData = function (data1,data2,data,type) {
+    //     var da = [];//未选中的数据
+    //     // d1.reverse();
+    //     $.each(data1,function(k,v){
+    //         if(!v.LAY_CHECKED){
+    //             da.push(v)
+    //         }
+    //     })
+    //     // dd.reverse();
+    //     $.each(data,function(kk,vv){
+    //         data2.push(vv)
+    //     })
+    //     var d = [];
+    //     if(type==0){
+    //         d.push(da)
+    //         d.push(data2)
+    //         $('#'+LEFT_BTN+this.index).children(BTN).addClass(DISABLED);
+    //     }else if(type==1){
+    //         d.push(data2)
+    //         d.push(da)
+    //         $('#'+RIGHT_BTN+this.index).children(BTN).addClass(DISABLED);
+    //     }
+    //     this.config.data = d
+    //     this.render()
+    // }
     //选中状态
     table.on('checkbox('+FILTER+')', function(obj){
         var idData = transfer.idData,lenght = idData.length;
@@ -237,6 +256,7 @@ layui.define('table',function (exports) {
             }
         }
     });
+
 
     transfer.render = function (options) {
         var inst = new Class(options)
