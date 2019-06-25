@@ -32,7 +32,7 @@ layui.define('table',function (exports) {
                     return [];
                 }
             }
-            ,get:function (option,type,field='') {
+            ,get:function (option,type,field) {
                 var index = option.index
                 var data = transfer.data;
                 if(!index){
