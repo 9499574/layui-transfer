@@ -156,12 +156,12 @@ layui.define('table',function (exports) {
         if(d1.length > 0 && type==0){
             //左边的数据移动到右表
             var n_d1 = []; 
-            d1.reverse()
+            //d1.reverse()
             for (var i = 0; i < d1.length; i++) {
                 if(d1[i].LAY_CHECKED===true){
                     delete d1[i].LAY_CHECKED
                     delete d1[i].LAY_TABLE_INDEX
-                    d2.unshift(d1[i])
+                    d2.push(d1[i])
                 }else{
                     delete d1[i].LAY_TABLE_INDEX
                     n_d1.push(d1[i])
@@ -171,7 +171,7 @@ layui.define('table',function (exports) {
             _d.push(n_d1,d2)
 
         }else if(d2.length > 0 && type==1){
-             //左边的数据移动到右表
+             //右边的数据移动到左表
             var n_d2 = []; 
             for (var i = 0; i < d2.length; i++) {
                 if(d2[i].LAY_CHECKED && d2[i].LAY_CHECKED===true){
